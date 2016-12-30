@@ -1,0 +1,7 @@
+<p>Уважаемый {{ user.username }},</p>
+<p>Поздравляем с регистрацией на <a href="www.glorystore.herokuapp.com">Glory Store</a></p>
+<p>Чтобы подтвердить регистрацию, пожалуйста, откройте <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">ссылку</a></p>
+<p>Спасибо что используете наш сервис</p>
+<p>Благословений Вам,</p>
+<p>Команда Glory Store App</p>
+<p><small>Сообщения с данного почтового ящика не отслеживаются</small></p>
