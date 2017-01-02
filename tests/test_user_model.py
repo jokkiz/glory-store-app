@@ -1,5 +1,5 @@
 import unittest
-from app.models import User
+from app.models import User, Permissions, AnonymousUser
 from app import db
 from datetime import datetime
 import time
@@ -48,3 +48,12 @@ class UserModelTestCase(unittest.TestCase):
         token = u.generate_confirmation_token(1)
         time.sleep(2)
         self.assertFalse(u.confirm(token))
+
+    def test_roles_and_permissions(self):
+        u = User(email='test@gmail.com', password='p@s$w0rd')
+        self.assertTrue(u.can(Permissions.WRITE_ARTICLES))
+        self.assertFalse(u.can(Permissions.MODERATE_COMMENTS))
+
+    def test_anonimous_user(self):
+        u = AnonymousUser()
+        self.assertFalse(u.can(Permissions.FOLLOW))

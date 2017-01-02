@@ -15,7 +15,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('main.index'))
-        flash('Неверно заданы логин или пароль')
+        flash('Неверно заданы логин или пароль', 'danger')
     return render_template('auth/login.html', form=form)
 
 
@@ -23,7 +23,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('Вы успешно вышли их системы')
+    flash('Вы успешно вышли их системы', 'info')
     return redirect(url_for('main.index'))
 
 
@@ -39,7 +39,7 @@ def register():
         token = user.generate_confirmation_token()
         send_mail(user.email, 'Подтверждение учетной записи',
                   'auth/email/confirm', user=user, token=token)
-        flash('Письмо с подтверждением было отправлено на ваш почтовый ящик')
+        flash('Письмо с подтверждением было отправлено на ваш почтовый ящик', 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -50,16 +50,18 @@ def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
     if current_user.confirm(token):
-        flash('Вы успешно подтвердили свою учетную запись')
+        flash('Вы успешно подтвердили свою учетную запись', 'info')
     else:
-        flash('Строка подтверждения недействительна или устарела')
+        flash('Строка подтверждения недействительна или устарела', 'danger')
     return redirect(url_for('main.index'))
 
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated and not current_user.confirmed and request.endpoint[:5] != 'auth.':
-        return redirect(url_for('auth.unconfirmed'))
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed and request.endpoint[:5] != 'auth.':
+            return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/unconfirmed')
@@ -74,9 +76,9 @@ def unconfirmed():
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_mail(current_user.email,
-              'Подтверждение учетной записи',
+              'Повторное подтверждение учетной записи',
               'auth/email/confirm',
               user=current_user.email,
               token=token)
-    flash('Новое письмо с подтверждением учетной записи отправлено на ваш email указанный при регистрации')
+    flash('Новое письмо с подтверждением учетной записи отправлено на ваш email указанный при регистрации', 'info')
     return redirect(url_for('main.index'))
