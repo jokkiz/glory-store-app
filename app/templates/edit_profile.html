@@ -10,36 +10,27 @@
 <div class="col-md-4">
     <form class="form form-horizontal" method="post" >
         {{ form.hidden_tag() }}
-       <!-- <div class="form-group">
-            <label class="col-md-2 control-label">{{ form.birthday.label.text}}</label>
-            <div class="col-md-10">
-                <div class="input-group date">
-                   <input type="text" class="form-control" value="{{ form.birthday.data}}">
-                   <span class="input-group-addon">
-                       <span class="fa fa-calendar"></span>
-                   </span>
-                </div>
-
-            </div>
-
-        </div> -->
-        {{ wtf.form_field(form.birthday, class="form-control datepicker") }}
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Изменить" class="btn btn-primary btn-lg">
-            </div>
-        </div>
+        {{ wtf.form_field(form.last_name) }}
+        {{ wtf.form_field(form.first_name) }}
+        {{ wtf.form_field(form.middle_name) }}
+        {% if form.email %}
+        {{ wtf.form_field(form.email) }}
+        {{ wtf.form_field(form.username) }}
+        {{ wtf.form_field(form.confirmed) }}
+        {{ wtf.form_field(form.role) }}
+        {% endif %}
+        {{ wtf.form_field(form.birthday, class="form-control datepicker" ) }}
+        {{ wtf.form_field(form.about_me) }}
+        {{ wtf.form_field(form.location) }}
+        {{ wtf.form_field(form.submit, button_map={'submit': 'primary btn-lg'}) }}
     </form>
-    <!--{{ wtf.quick_form(form) }} -->
 </div>
 {% endblock %}
 {% block scripts %}
 {{ super() }}
     <script>
         $(function () {
-            $('.datepicker').datetimepicker({
-                locale: 'ru'
-            });
+            $('.datepicker').datetimepicker({locale: 'ru'});
         });
     </script>
 {% endblock %}

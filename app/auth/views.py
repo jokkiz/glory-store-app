@@ -50,7 +50,7 @@ def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
     if current_user.confirm(token):
-        flash('Вы успешно подтвердили свою учетную запись', 'info')
+        flash('Вы успешно подтвердили свою учетную запись', 'success')
     else:
         flash('Строка подтверждения недействительна или устарела', 'danger')
     return redirect(url_for('main.index'))
