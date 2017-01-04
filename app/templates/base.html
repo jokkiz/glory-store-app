@@ -19,11 +19,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Glory Store</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <span class="glyphicon glyphicon-leaf" aria-hidden="true"></span>&nbsp;Glory Store
+            </a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Домашняя</a></li>
+                <li><a href="{{ url_for('main.index') }}"><i class="fa fa-home fa-lg" aria-hidden="true"></i></a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
