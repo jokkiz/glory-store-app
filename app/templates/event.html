@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block page_content %}
+<div class="jumbotron text-center">
+    <p class="lead">
+    {% if event.date_begin or event.date_end %}
+        <h4>{{ moment(event.date_begin).format('LLL') }} - {{ moment(event.date_end).format('LLL') }}</h4>
+    {% endif %}
+    </p>
+    <h1>{{ event.name }}</h1>
+    <p>
+        <a class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#regToEvent">Зарегистрироваться</a>
+    </p>
+</div>
+<hr/>
+<div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-8">
+        {{ event.description }}
+    </div>
+    <div class="col-xs-6 col-md-4">
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#regToEvent">Я хочу пойти!</button>
+    </div>
+</div>
+<h4>Автор:&nbsp;{{ event.creator_id}}</h4>
+<p>
+    <a href="{{ url_for('main.add_event', short_name=event.short_name) }}">Редактировать</a>|
+    <a href="{{ url_for('main.events_list') }}">Вернуться к списку</a>
+</p>
+{% endblock %}

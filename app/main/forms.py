@@ -1,9 +1,9 @@
 from flask_wtf import Form
 from wtforms import StringField, TextAreaField, BooleanField, SelectField, SubmitField
-from wtforms.fields.html5 import DateField
+from wtforms.fields.html5 import DateField, DateTimeField
 from wtforms.validators import Required, Length, Email, Regexp, Optional
 from wtforms import ValidationError
-from ..models import Role, User
+from ..models import Role, User, Event
 
 
 class NameForm(Form):
@@ -58,3 +58,18 @@ class EditProfileAdminForm(Form):
             raise ValidationError('Пользователь с данным логином уже существует')
 
 
+class EventForm(Form):
+    short_name = StringField('Краткое наименование',
+                             validators=[Required(),
+                                         Length(2, 20, message="Длина короткого наименования мероприятия должна быть от 2 до 20 символов"),
+                                         Regexp('[А-Яа-яA-Za-z0-9_]*$', 0, 'Короткое наименование может содержать только буквы, цифры и нижние подчеркивания')])
+    name = StringField('Полное наименование', validators=[Required(), Length(2, 64, message="Длина полного наименования мероприятия должна быть от 2 до 64 символов")])
+    description = TextAreaField('Описание мероприятия')
+    date_begin = DateTimeField('Дата начала мероприятия', format="%d.%m.%Y %H:%M:%S")
+    date_end = DateTimeField('Дата окончания мероприятия', format="%d.%m.%Y %H:%M:%S")
+    location = StringField('Место проведения', validators=[Length(0, 64, message="Длина строки места проведения должна не превышать 64 символа")])
+    submit = SubmitField('Добавить мероприятие')
+
+    def validate_short_name(self, field):
+        if Event.query.filter_by(short_name=field.data).first():
+            raise ValidationError('Мероприятие с данным коротким наименованием существует')

@@ -26,12 +26,21 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.index') }}"><i class="fa fa-home fa-lg" aria-hidden="true"></i></a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        События <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Календарь событий</a></li>
+                        <li><a href="{{ url_for('main.events_list')}}">Список событий</a></li>
+                    </ul>
+                </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        {{ current_user.username }} <span class="caret"></span>
+                        <img src="{{ current_user.gravatar(size=18)}}">&nbsp;{{ current_user.username }} <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.user', username=current_user.username)}}">Профиль</a></li>
@@ -66,6 +75,6 @@
 {{ moment.include_moment() }}
 {{ moment.lang("ru") }}
 
-<!--<script src = "{{ url_for('static', filename='js/moment-with-locales.min.js')}}"></script> -->
+<script src = "{{ url_for('static', filename='js/moment-with-locales.min.js')}}"></script>
 <script src = "{{ url_for('static', filename='js/bootstrap-datetimepicker.js') }}"></script>
 {% endblock %}

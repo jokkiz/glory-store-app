@@ -16,7 +16,7 @@ class Permissions:
 
 
 class Role(db.Model):
-    __tablename__='roles'
+    __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
@@ -26,10 +26,10 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'User': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES, True),
-            'Moderator': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES |
+            'Пользователь': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES, True),
+            'Модератор': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES |
                           Permissions.MODERATE_COMMENTS, False),
-            'Administrator': (0xff, False)
+            'Администратор': (0xff, False)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -63,6 +63,7 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow())
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
+    avatar_hash = db.Column(db.String(32))
 
     @property
     def password(self):
@@ -98,6 +99,8 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+        if self.email is not None and self.avatar_hash is None:
+            self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
 
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
@@ -114,9 +117,27 @@ class User(UserMixin, db.Model):
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
-        hash0 = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+        hash0 = self.avatar_hash or hashlib.md5(self.email.encode('utf-8')).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash0, size=size,
                                                                      default=default, rating=rating)
+
+    def change_email(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.load(token)
+        except:
+            return False
+        if data.get('change_email') != self.id:
+            return False
+        new_email = data.get('new_email')
+        if new_email is None:
+            return False
+        if self.query.filter_by(email=new_email).first() is not None:
+            return False
+        self.email = new_email
+        self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+        db.session.add(self)
+        return True
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -125,6 +146,19 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_administrator(self):
         return False
+
+
+class Event(db.Model):
+    __tablename__ = "events"
+    id = db.Column(db.Integer, primary_key=True)
+    short_name = db.Column(db.String(20), unique=True)
+    name = db.Column(db.String(64))
+    description = db.Column(db.Text())
+    date_begin = db.Column(db.DateTime(), default=datetime.utcnow())
+    date_end = db.Column(db.DateTime(), default=datetime.utcnow())
+    location = db.Column(db.String(64))
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 
 login_manager.anonymous_user = AnonymousUser
 

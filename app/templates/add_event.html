@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Glory Store - добавление события{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Добавление нового мероприятия</h1>
+</div>
+<div class="col-md-4">
+     <form class="form form-horizontal" method="post" >
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.short_name) }}
+        {{ wtf.form_field(form.name) }}
+        {{ wtf.form_field(form.description) }}
+        {{ wtf.form_field(form.location) }}
+        {{ wtf.form_field(form.date_begin, class="form-control datepicker") }}
+        {{ wtf.form_field(form.date_end, class="form-control datepicker") }}
+        {{ wtf.form_field(form.submit, button_map={'submit': 'primary btn-lg'}) }}
+     </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script>
+        $(function () {
+            $('.datepicker').datetimepicker({locale: 'ru'});
+        });
+    </script>
+{% endblock %}

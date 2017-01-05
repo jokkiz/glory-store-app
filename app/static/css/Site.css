@@ -1,0 +1,64 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Lobster&subset=latin,cyrillic');
+@font-face {
+    font-family: 'Roboto Condensed';
+}
+body {
+    padding-top: 70px;
+    padding-bottom: 70px;
+    display: flex;
+    flex-flow: row wrap;
+   /*font-size: large;*/
+    font-family: 'Roboto Condensed', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+}
+
+nav {
+    padding-right: 30px;
+    font-family: 'Roboto Condensed', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#top-navbar {
+   /* background-color: #FFB400;
+    color: #474744;*/
+    border: none;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#bottom-navbar {
+    padding-left: 30px;
+}
+
+h1, h2 {
+    font-family: 'Lobster', 'Roboto Condensed', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+}
+h3, h4 {
+    font-family: 'Roboto Condensed', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-thumbnail {
+    position: absolute;
+}
+.profile-header {
+    min-height: 260px;
+    margin-left: 280px;
+}
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Glory Store - список событий{% endblock %}
+
+{% block page_content %}
+<form class="form-inline" method="post">
+    <div class="form-group">
+        <label for="inputString"><i class="fa fa-search fa-lg" aria-hidden="true"></i></label>
+        <input type="text" name="searchString" class="form-control" id="inputString">
+    </div>
+</form>
+<br/>
+<div class="row">
+
+    {% for item in events_list %}
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            {% if item.image %}
+                <a target="_blank" >
+                    <img class="img-rounded img-responsive" src="" alt="100%x200" width="200" style="height:200px;width: 100%; display: block">
+                </a>
+            {% endif %}
+            <div class="caption">
+                <h2><a href="{{ url_for('main.event', short_name = item.short_name) }}">{{ item.name }}</a></h2>
+                <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_begin).format('LLL') }}</p>
+                <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_begin).format('LLL') }}</p>
+                <p><a href="{{ url_for('main.event', short_name = item.short_name) }}" class="btn btn-default" role="button">Подробности и регистрация</a></p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
