@@ -3,7 +3,10 @@
 <div class="jumbotron text-center">
     <p class="lead">
     {% if event.date_begin or event.date_end %}
-        <h4>{{ moment(event.date_begin).format('LLL') }} - {{ moment(event.date_end).format('LLL') }}</h4>
+        <h4>{{ moment(event.date_begin).format('LLLL') }} - {{ moment(event.date_end).format('LLLL') }}</h4>
+    {% endif %}
+    {% if event.location %}
+    <h5>{{ event.location }}</h5>
     {% endif %}
     </p>
     <h1>{{ event.name }}</h1>
@@ -14,15 +17,19 @@
 <hr/>
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-8">
+        {% autoescape false %}
         {{ event.description }}
+        {% endautoescape %}
     </div>
     <div class="col-xs-6 col-md-4">
         <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#regToEvent">Я хочу пойти!</button>
     </div>
 </div>
-<h4>Автор:&nbsp;{{ event.creator_id}}</h4>
+{% if user.username %}
+<h4>Автор:&nbsp;{{ user.username}}</h4>
+{% endif %}
 <p>
-    <a href="{{ url_for('main.add_event', short_name=event.short_name) }}">Редактировать</a>|
+    <a href="{{ url_for('main.edit_event', id=event.id) }}">Редактировать</a>|
     <a href="{{ url_for('main.events_list') }}">Вернуться к списку</a>
 </p>
 {% endblock %}

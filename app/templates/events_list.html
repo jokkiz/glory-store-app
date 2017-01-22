@@ -1,17 +1,39 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block title %}Glory Store - список событий{% endblock %}
 
 {% block page_content %}
-<form class="form-inline" method="post">
+<form class="form form-inline" role="form">
+  <div class="form-group">
+    <label class="sr-only" for="searchString">Поиск</label>
+    <div class="input-group">
+      <div class="input-group-addon"><i class="fa fa-search fa-lg" aria-hidden="true"></i></div>
+      <input type="text" class="form-control" id="searchString" placeholder="Найти">
+    </div>
+  </div>
+    <div class="btn-group" role="group">
+        <button type="submit" class="btn btn-primary">Поиск</button>
+        {% if current_user.is_administrator %}
+        <a class="btn btn-default" role="button" href="{{ url_for('main.add_event') }}">Добавить новое мероприятие</a>
+        {% endif %}
+    </div>
+</form>
+
+<form class="form-inline" role="form">
     <div class="form-group">
-        <label for="inputString"><i class="fa fa-search fa-lg" aria-hidden="true"></i></label>
-        <input type="text" name="searchString" class="form-control" id="inputString">
+        <label for="searchString"><i class="fa fa-search fa-lg" aria-hidden="true"></i></label>
+        <input type="text" name="searchString" class="form-control" id="searchString"/>
+    </div>
+    <div class="btn btn-group">
+        <button type="submit" class="btn btn-primary">Поиск</button>
+        {% if current_user.is_administrator %}
+            <a class="btn btn-default" role="button" href="{{ url_for('main.add_event') }}">Добавить новое мероприятие</a>
+        {% endif %}
     </div>
 </form>
 <br/>
 <div class="row">
-
     {% for item in events_list %}
     <div class="col-sm-6 col-md-4">
         <div class="thumbnail">
@@ -23,11 +45,17 @@
             <div class="caption">
                 <h2><a href="{{ url_for('main.event', short_name = item.short_name) }}">{{ item.name }}</a></h2>
                 <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_begin).format('LLL') }}</p>
-                <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_begin).format('LLL') }}</p>
+                <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_end).format('LLL') }}</p>
                 <p><a href="{{ url_for('main.event', short_name = item.short_name) }}" class="btn btn-default" role="button">Подробности и регистрация</a></p>
             </div>
         </div>
     </div>
     {% endfor %}
+
 </div>
+    {% if pagination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.events_list') }}
+    </div>
+    {% endif %}
 {% endblock %}

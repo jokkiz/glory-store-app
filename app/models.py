@@ -26,8 +26,12 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'Пользователь': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES, True),
-            'Модератор': (Permissions.FOLLOW | Permissions.COMMENT | Permissions.WRITE_ARTICLES |
+            'Пользователь': (Permissions.FOLLOW |
+                             Permissions.COMMENT |
+                             Permissions.WRITE_ARTICLES, True),
+            'Модератор': (Permissions.FOLLOW |
+                          Permissions.COMMENT |
+                          Permissions.WRITE_ARTICLES |
                           Permissions.MODERATE_COMMENTS, False),
             'Администратор': (0xff, False)
         }
@@ -39,8 +43,6 @@ class Role(db.Model):
             role.default = roles[r][1]
             db.session.add(role)
         db.session.commit()
-
-
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -64,6 +66,7 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow())
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
     avatar_hash = db.Column(db.String(32))
+    events_owning = db.relationship('Event', backref='owner', lazy='dynamic')
 
     @property
     def password(self):
@@ -157,7 +160,8 @@ class Event(db.Model):
     date_begin = db.Column(db.DateTime(), default=datetime.utcnow())
     date_end = db.Column(db.DateTime(), default=datetime.utcnow())
     location = db.Column(db.String(64))
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    amenities = db.relationship('Amenity', backref='')
 
 
 login_manager.anonymous_user = AnonymousUser
@@ -166,3 +170,12 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class Amenity(db.Model):
+    __tablename_ = 'amenities'
+    id = db.Column(db.Integer, primary_key=True)
+    short_name = db.Column(db.String(20))
+    name = db.Column(db.String(64))
+    description = db.Column(db.Text())
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))

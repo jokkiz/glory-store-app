@@ -1,8 +1,8 @@
 from datetime import datetime
 from time import strftime
-from flask import render_template, session, redirect, url_for, abort, flash
+from flask import render_template, session, redirect, url_for, abort, flash, request, current_app
 from . import main
-from .forms import NameForm, EditProfileForm, EditProfileAdminForm, EventForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm, EditEventForm, EventForm
 from .. import db
 from ..models import User, Role, Event
 from flask_login import login_required, current_user
@@ -84,12 +84,13 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form=form, user=user)
 
 
-@main.route('/events/add', methods=['GET', 'POST'])
+@main.route('/edit-event/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
-def add_event():
-    form = EventForm()
-    e = Event()
+def edit_event(id):
+    e = Event.query.get_or_404(id)
+    print(e.short_name)
+    form = EditEventForm(e)
     if form.validate_on_submit():
         e.short_name = form.short_name.data
         e.name = form.name.data
@@ -97,29 +98,72 @@ def add_event():
         e.location = form.location.data
         e.date_begin = form.date_begin.data
         e.date_end = form.date_end.data
-        e.creator_id = current_user.id
+        db.session.add(e)
+        flash('Мероприятие было успешно обновлено', 'success')
+        return redirect(url_for('.event', short_name=e.short_name))
+    form.short_name.data = e.short_name
+    form.name.data = e.name
+    form.location.data = e.location
+    form.description.data = e.description
+    form.date_begin.data = e.date_begin.strftime('%d.%m.%Y %H:%M')
+    form.date_end.data = e.date_end.strftime('%d.%m.%Y %H:%M')
+    return render_template('edit_event.html', form=form)
+
+
+@main.route('/events/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_event():
+    form = EventForm()
+    print('Format {0}'.format(form.date_begin.format))
+    print('На входе {0}'.format(form.date_begin.data))
+    e = Event(short_name=form.short_name.data,
+              name=form.name.data,
+              description=form.description.data,
+              location=form.location.data,
+              date_begin=form.date_begin.data,
+              date_end=form.date_end.data,
+              owner_id=current_user.id)
+    if form.validate_on_submit():
+        # e.short_name = form.short_name.data
+        # e.name = form.name.data
+        # e.description = form.description.data
+        # e.location = form.location.data
+        # e.date_begin = form.date_begin.data
+        # e.date_end = form.date_end.data
+        # e.creator_id = current_user.id
         db.session.add(e)
         db.session.commit()
+        print("Дата {0}".format(form.date_end.data))
         flash('Событие было успешно добавлено', 'success')
-        return redirect(url_for('.event', form=form))
+        return redirect(url_for('.event', short_name=form.short_name.data))
     form.short_name.data = e.short_name
     form.name.data = e.name
     form.description.data = e.description
     form.location.data = e.location
     form.date_begin.data = e.date_begin
     form.date_end.data = e.date_end
+    print("Добавление даты начала {0}".format(form.date_begin.data))
+    print("Дата окончания {0}".format(form.date_end.data))
     return render_template('add_event.html', form=form)
 
 
 @main.route('/events/<short_name>')
 def event(short_name):
-    event_ = Event.query.filter_by(short_name=short_name).first()
-    if user is None:
-        abort(404)
-    return render_template('event.html', event=event_)
+    e = Event.query.filter_by(short_name=short_name).first()
+    if e is not None:
+        u = User.query.filter_by(id=e.owner_id).first()
+    else:
+        u = None
+    return render_template('event.html', event=e, user=u)
 
 
 @main.route('/events')
 def events_list():
-    list_events = Event.query.order_by(Event.date_end.desc()).all()
-    return render_template('events_list.html', events_list=list_events)
+    page = request.args.get('page', 1, type=int)
+    pagination = Event.query.order_by(Event.date_end.desc()).paginate(
+        page, per_page=current_app.config['GS_EVENT_PER_PAGE'], error_out=False
+    )
+
+    list_events = pagination.items
+    return render_template('events_list.html', events_list=list_events, pagination=pagination)
