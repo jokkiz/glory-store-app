@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Glory Store - добавление события{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Добавление нового мероприятия</h1>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

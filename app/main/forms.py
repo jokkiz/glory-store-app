@@ -1,9 +1,10 @@
 from flask_wtf import Form
-from wtforms import StringField, TextAreaField, BooleanField, SelectField, SubmitField, DateTimeField
+from wtforms import StringField, TextAreaField, BooleanField, SelectField, SubmitField, DateTimeField, DecimalField
 from wtforms.fields.html5 import DateField, DateTimeLocalField # , DateTimeField
 from wtforms.validators import Required, Length, Email, Regexp, Optional
 from wtforms import ValidationError
 from ..models import Role, User, Event
+from flask_pagedown.fields import PageDownField
 
 
 class NameForm(Form):
@@ -24,7 +25,7 @@ class EditProfileForm(Form):
                                           Length(1, 128,
                                           message="Отчество не может быть короче 1 и длинее 128 символов")])
     birthday = DateField('День рождения', format="%Y-%m-%d")
-    about_me = TextAreaField('Обо мне')
+    about_me = PageDownField('Обо мне')
     location = StringField('Местонахождение',
                            validators=[Length(3, 64,
                                               message="Длина местонахождения должна быть от 3 до 64 символов")])
@@ -47,7 +48,7 @@ class EditProfileAdminForm(Form):
     middle_name = StringField('Отчество',
                               validators=[Length(1, 128, message="Отчество должно быть от 1 до 128 символов")])
     birthday = DateField('День рождения', format='%Y-%m-%d')
-    about_me = TextAreaField('Обо мне')
+    about_me = PageDownField('Обо мне')
     location = StringField('Местонахождение',
                            validators=[Length(3, 64,
                                               message="Длина местонахождения должна быть от 3 до 64 символов")])
@@ -75,7 +76,7 @@ class EditEventForm(Form):
     name = StringField('Полное наименование',
                        validators=[Required(message="Данное поле является обязательным для заполнения"),
                                    Length(2, 64, message="Длина полного наименования мероприятия должна быть от 2 до 64 символов")])
-    description = TextAreaField('Описание мероприятия')
+    description = PageDownField('Описание мероприятия')
     date_begin = DateTimeField('Дата начала мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
     date_end = DateTimeField('Дата окончания мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
     location = StringField('Место проведения', validators=[Length(0, 64, message="Длина строки места проведения должна не превышать 64 символа")])
@@ -98,8 +99,16 @@ class EventForm(Form):
     name = StringField('Полное наименование',
                        validators=[Required(message="Данное поле является обязательным для заполнения"),
                                    Length(2, 64, message="Длина полного наименования мероприятия должна быть от 2 до 64 символов")])
-    description = TextAreaField('Описание мероприятия')
+    description = PageDownField('Описание мероприятия')
     date_begin = DateTimeField('Дата начала мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
     date_end = DateTimeField('Дата окончания мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
     location = StringField('Место проведения', validators=[Length(0, 64, message="Длина строки места проведения должна не превышать 64 символа")])
     submit = SubmitField('Добавить мероприятие')
+
+
+class AddAmenityForm(Form):
+    short_name = StringField('Вариант мероприятия', validators=[Required(message="Данное поле является обязательным для заполнения"),
+                                                                Length(2, 20, message="Длина поля должна быть от 2 до 20 символов")])
+    name = StringField('Описание', validators=[Length(2, 64, message="Длина поля должна быть от 2 до 64 символов")])
+    cost = DecimalField('Цена')
+    submit = SubmitField('Добавить вариант пребывания')

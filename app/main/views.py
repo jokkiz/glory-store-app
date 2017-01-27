@@ -2,9 +2,9 @@ from datetime import datetime
 from time import strftime
 from flask import render_template, session, redirect, url_for, abort, flash, request, current_app
 from . import main
-from .forms import NameForm, EditProfileForm, EditProfileAdminForm, EditEventForm, EventForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm, EditEventForm, EventForm, AddAmenityForm
 from .. import db
-from ..models import User, Role, Event
+from ..models import User, Role, Event, Amenity
 from flask_login import login_required, current_user
 from ..decorators import admin_required
 from sqlalchemy import desc
@@ -115,8 +115,6 @@ def edit_event(id):
 @admin_required
 def add_event():
     form = EventForm()
-    print('Format {0}'.format(form.date_begin.format))
-    print('На входе {0}'.format(form.date_begin.data))
     e = Event(short_name=form.short_name.data,
               name=form.name.data,
               description=form.description.data,
@@ -167,3 +165,24 @@ def events_list():
 
     list_events = pagination.items
     return render_template('events_list.html', events_list=list_events, pagination=pagination)
+    form = AddAmenityForm
+
+@main.route('/amenities/add')
+@admin_required
+def add_amenity(short_name):
+    form = AddAmenityForm()
+    e = Event.query.filter_by(short_name=short_name).first()
+    amenity = Amenity(short_name=form.short_name.data,
+                      name=form.name.data,
+                      cost=form.cost.data,
+                      event=e)
+    if form.validate_on_submit():
+        db.session.add(amenity)
+        db.session.commit()
+        flash('Вариант пребывания успешно добавлен', 'success')
+        return redirect(url_for('.event', short_name=short_name))
+    form.short_name.data = amenity.short_name
+    form.name.data = amenity.name
+    form.cost.data = amenity.cost
+    return render_template('add_amenity.html', form=form)
+

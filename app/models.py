@@ -3,7 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request
-from datetime import datetime
+import datetime
+from datetime import datetime as dt
 import hashlib
 
 
@@ -63,8 +64,8 @@ class User(UserMixin, db.Model):
     birthday = db.Column(db.Date())
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow())
-    last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
+    member_since = db.Column(db.DateTime(), default=dt.utcnow())
+    last_seen = db.Column(db.DateTime(), default=dt.utcnow())
     avatar_hash = db.Column(db.String(32))
     events_owning = db.relationship('Event', backref='owner', lazy='dynamic')
 
@@ -112,7 +113,7 @@ class User(UserMixin, db.Model):
         return self.can(Permissions.ADMINISTER)
 
     def ping(self):
-        self.last_seen = datetime.utcnow()
+        self.last_seen = dt.utcnow()
         db.session.add(self)
 
     def gravatar(self, size=100, default='identicon', rating='g'):
@@ -142,6 +143,31 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    @staticmethod
+    def generate_fake(count=100):
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            u = User(email=forgery_py.internet.email_address(),
+                     username=forgery_py.internet.user_name(True),
+                     password=forgery_py.lorem_ipsum.word(),
+                     confirmed=True,
+                     first_name=forgery_py.name.first_name(),
+                     last_name=forgery_py.name.last_name(),
+                     birthday=forgery_py.date.date(True, min_delta=5110, max_delta=18250),
+                     location=forgery_py.address.city(),
+                     about_me=forgery_py.lorem_ipsum.sentence(),
+                     member_since=forgery_py.date.date(True)
+                     )
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
@@ -157,12 +183,37 @@ class Event(db.Model):
     short_name = db.Column(db.String(20), unique=True)
     name = db.Column(db.String(64))
     description = db.Column(db.Text())
-    date_begin = db.Column(db.DateTime(), default=datetime.utcnow())
-    date_end = db.Column(db.DateTime(), default=datetime.utcnow())
+    date_begin = db.Column(db.DateTime(), default=dt.utcnow())
+    date_end = db.Column(db.DateTime(), default=dt.utcnow())
     location = db.Column(db.String(64))
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     amenities = db.relationship('Amenity', backref='')
 
+    @staticmethod
+    def generate_fake(count=30):
+        from random import seed, randint
+        from sqlalchemy.exc import IntegrityError
+        import forgery_py
+
+        seed()
+        u = User.query.filter_by(username='jokkiz').first()
+
+        for i in range(count):
+            date_begin = forgery_py.date.date()
+            date_end = date_begin + datetime.timedelta(days=randint(1,5))
+            e = Event(short_name=forgery_py.lorem_ipsum.title(1),
+                      name=forgery_py.lorem_ipsum.words(3),
+                      description=forgery_py.lorem_ipsum.sentence(),
+                      date_begin=date_begin,
+                      date_end=date_end,
+                      location=forgery_py.address.city(),
+                      owner=u,
+                      amenities=Amenity.query.offset(2))
+            db.session.add(e)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
 
 login_manager.anonymous_user = AnonymousUser
 
@@ -177,5 +228,5 @@ class Amenity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     short_name = db.Column(db.String(20))
     name = db.Column(db.String(64))
-    description = db.Column(db.Text())
+    cost = db.Column(db.Numeric())
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
