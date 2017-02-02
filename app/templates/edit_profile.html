@@ -28,6 +28,7 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+{{ pagedown.include_pagedown() }}
     <script>
         $(function () {
             $('.datepicker').datetimepicker({locale: 'ru'});

@@ -123,16 +123,8 @@ def add_event():
               date_end=form.date_end.data,
               owner_id=current_user.id)
     if form.validate_on_submit():
-        # e.short_name = form.short_name.data
-        # e.name = form.name.data
-        # e.description = form.description.data
-        # e.location = form.location.data
-        # e.date_begin = form.date_begin.data
-        # e.date_end = form.date_end.data
-        # e.creator_id = current_user.id
         db.session.add(e)
         db.session.commit()
-        print("Дата {0}".format(form.date_end.data))
         flash('Событие было успешно добавлено', 'success')
         return redirect(url_for('.event', short_name=form.short_name.data))
     form.short_name.data = e.short_name
@@ -141,8 +133,6 @@ def add_event():
     form.location.data = e.location
     form.date_begin.data = e.date_begin
     form.date_end.data = e.date_end
-    print("Добавление даты начала {0}".format(form.date_begin.data))
-    print("Дата окончания {0}".format(form.date_end.data))
     return render_template('add_event.html', form=form)
 
 
@@ -165,7 +155,7 @@ def events_list():
 
     list_events = pagination.items
     return render_template('events_list.html', events_list=list_events, pagination=pagination)
-    form = AddAmenityForm
+
 
 @main.route('/amenities/add')
 @admin_required

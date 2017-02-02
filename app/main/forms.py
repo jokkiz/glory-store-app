@@ -1,6 +1,6 @@
 from flask_wtf import Form
 from wtforms import StringField, TextAreaField, BooleanField, SelectField, SubmitField, DateTimeField, DecimalField
-from wtforms.fields.html5 import DateField, DateTimeLocalField # , DateTimeField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import Required, Length, Email, Regexp, Optional
 from wtforms import ValidationError
 from ..models import Role, User, Event
@@ -102,7 +102,7 @@ class EventForm(Form):
     description = PageDownField('Описание мероприятия')
     date_begin = DateTimeField('Дата начала мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
     date_end = DateTimeField('Дата окончания мероприятия', format="%d.%m.%Y %H:%M", validators=[Optional()])
-    location = StringField('Место проведения', validators=[Length(0, 64, message="Длина строки места проведения должна не превышать 64 символа")])
+    location = StringField('Место проведения', validators=[Length(0, 128, message="Длина строки места проведения должна не превышать 64 символа")])
     submit = SubmitField('Добавить мероприятие')
 
 

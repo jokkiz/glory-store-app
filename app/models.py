@@ -6,6 +6,8 @@ from flask import current_app, request
 import datetime
 from datetime import datetime as dt
 import hashlib
+import bleach
+from markdown import markdown
 
 
 class Permissions:
@@ -64,6 +66,7 @@ class User(UserMixin, db.Model):
     birthday = db.Column(db.Date())
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
+
     member_since = db.Column(db.DateTime(), default=dt.utcnow())
     last_seen = db.Column(db.DateTime(), default=dt.utcnow())
     avatar_hash = db.Column(db.String(32))
@@ -182,10 +185,11 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     short_name = db.Column(db.String(20), unique=True)
     name = db.Column(db.String(64))
-    description = db.Column(db.Text())
+    description = db.Column(db.Text)
+    description_html = db.Column(db.Text)
     date_begin = db.Column(db.DateTime(), default=dt.utcnow())
     date_end = db.Column(db.DateTime(), default=dt.utcnow())
-    location = db.Column(db.String(64))
+    location = db.Column(db.String(128))
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     amenities = db.relationship('Amenity', backref='')
 
@@ -214,6 +218,17 @@ class Event(db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+    @staticmethod
+    def on_changed_description(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol',
+                        'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.description_html = bleach.linkify(bleach.clean(
+            markdown(value or u'', ouput_format='html'),
+            tags=allowed_tags, strip=True))
+
+
+db.event.listen(Event.description, 'set', Event.on_changed_description)
 
 login_manager.anonymous_user = AnonymousUser
 

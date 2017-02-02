@@ -17,9 +17,27 @@
 <hr/>
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-8">
-        {% autoescape false %}
-        {{ event.description }}
-        {% endautoescape %}
+        {% if event.description_html %}
+            {{ event.description_html | safe }}
+        {% else %}
+            {{ event.description | safe }}
+        {% endif %}
+        {% if event.amenities %}
+        <table class="table table-striped">
+            <thead>
+                <tr>Стоимость</tr>
+                <tr>Вариант пребывания</tr>
+                <tr></tr>
+            </thead>
+            <tbody>
+            {% for amenity in event.amenities %}
+                <tr>{{amenity.cost}}</tr>
+                <tr>{{amenity.name}}</tr>
+                <tr></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
     <div class="col-xs-6 col-md-4">
         <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#regToEvent">Я хочу пойти!</button>

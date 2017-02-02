@@ -46,6 +46,7 @@
                 <h2><a href="{{ url_for('main.event', short_name = item.short_name) }}">{{ item.name }}</a></h2>
                 <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_begin).format('LLL') }}</p>
                 <p><i class="fa fa-calendar fa-lg" aria-hidden="true"></i>&nbsp; {{ moment(item.date_end).format('LLL') }}</p>
+                <p><i class="fa fa-flag fa-lg" aria-hidden="true"></i>&nbsp;<a href="http://maps.google.com/?q={{item.location}}">{{item.location}}</a> </p>
                 <p><a href="{{ url_for('main.event', short_name = item.short_name) }}" class="btn btn-default" role="button">Подробности и регистрация</a></p>
             </div>
         </div>
